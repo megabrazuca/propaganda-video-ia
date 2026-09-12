@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="pt-PT" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Criando propaganda de qualquer produto com IA | Jony Lan Studio</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts (Inter & JetBrains Mono) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- GSAP & ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            apple: {
+              black: '#000000',
+              dark: '#08080a',
+              card: '#121215',
+              cardHover: '#1a1a1e',
+              border: 'rgba(255, 255, 255, 0.12)',
+              gray: '#86868b',
+              lightGray: '#f5f5f7',
+              blue: '#2997ff',
+              hoverBlue: '#0077ed',
+              cyan: '#00c7be',
+              purple: '#af52de'
+            }
+          },
+          animation: {
+            'pulse-glow': 'pulseGlow 4s ease-in-out infinite',
+            'float': 'float 6s ease-in-out infinite',
+            'shimmer': 'shimmer 2.5s infinite linear'
+          },
+          keyframes: {
+            pulseGlow: {
+              '0%, 100%': { opacity: '0.4', transform: 'scale(1)' },
+              '50%': { opacity: '0.8', transform: 'scale(1.08)' }
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-10px)' }
+            },
+            shimmer: {
+              '0%': { backgroundPosition: '-200% 0' },
+              '100%': { backgroundPosition: '200% 0' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #000000;
+      color: #f5f5f7;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* Barra de progresso de scroll no topo */
+    #scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #2997ff, #af52de, #00c7be);
+      z-index: 60;
+      width: 0%;
+      transition: width 0.1s ease-out;
+    }
+
+    /* Vidro fosco de alta performance estilo Apple */
+    .apple-glass {
+      background: rgba(18, 18, 22, 0.7);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .apple-nav {
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .apple-gradient-text {
+      background: linear-gradient(180deg, #FFFFFF 20%, #94949b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .apple-gradient-accent {
+      background: linear-gradient(135deg, #2997ff 0%, #af52de 50%, #00c7be 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Efeitos de 3D para o dispositivo dobrável */
+    .device-perspective {
+      perspective: 1400px;
+    }
+
+    .device-wing {
+      transform-style: preserve-3d;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .shine-effect {
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transform: skewX(-25deg);
+    }
+
+    /* Scrollbar personalizada */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #000000;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #27272a;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3f3f46;
+    }
+
+    /* Efeito de brilho neon nos cartões */
+    .glow-card {
+      position: relative;
+    }
+    .glow-card::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      background: linear-gradient(135deg, rgba(41, 151, 255, 0.3), rgba(175, 82, 222, 0.3), transparent);
+      border-radius: 1.5rem;
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    .glow-card:hover::before {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body class="selection:bg-apple-blue selection:text-white relative">
+
+  <!-- Canvas de Partículas Fluídas de Fundo -->
+  <canvas id="ambient-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-40"></canvas>
+
+  <!-- Indicador de Scroll no Topo -->
+  <div id="scroll-progress"></div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center space-x-3 bg-neutral-900/95 backdrop-blur-2xl border border-white/20 text-white px-5 py-3.5 rounded-2xl shadow-2xl">
+    <div class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+      <i class="fa-solid fa-check text-xs"></i>
+    </div>
+    <span id="toast-message" class="text-sm font-medium">Copiado com sucesso!</span>
+  </div>
+
+  <!-- Header Fixo -->
+  <header class="fixed top-0 inset-x-0 z-40 apple-nav transition-all duration-300">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <a href="#" class="text-white hover:text-gray-300 transition-colors flex items-center space-x-2 group">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-apple-blue to-purple-600 flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform">
+            <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+          </div>
+          <span class="font-semibold tracking-tight text-sm">Studio AI</span>
+        </a>
+        <span class="text-white/20 hidden sm:inline">|</span>
+        <span class="text-xs text-apple-gray hidden sm:inline uppercase tracking-widest font-semibold">Masterclass UGC</span>
+      </div>
+
+      <nav class="hidden md:flex items-center space-x-8 text-xs font-medium text-apple-gray">
+        <a href="#produto" class="hover:text-white transition-colors">Produto 3D</a>
+        <a href="#ferramentas" class="hover:text-white transition-colors">Ferramentas</a>
+        <a href="#passo-a-passo" class="hover:text-white transition-colors">Passo a Passo</a>
+        <a href="#simulador-ugc" class="hover:text-white transition-colors">Simulador 10s</a>
+        <a href="#prompts" class="hover:text-white transition-colors">Gerador</a>
+      </nav>
+
+      <div class="flex items-center space-x-3">
+        <a href="https://instagram.com/jonylan" target="_blank" rel="noopener noreferrer" 
+           class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-xs text-white font-medium transition-all transform hover:scale-105 shadow-sm">
+          <i class="fa-brands fa-instagram text-pink-400"></i>
+          <span>@jonylan</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="pt-36 pb-20 px-4 sm:px-6 max-w-6xl mx-auto flex flex-col items-center text-center relative z-10">
+    <!-- Glow Central -->
+    <div class="absolute top-20 left-1/2 -translate-x-1/2 w-[340px] sm:w-[650px] h-[340px] bg-gradient-to-tr from-blue-600/20 via-purple-600/20 to-emerald-500/10 rounded-full blur-[140px] pointer-events-none -z-10 animate-pulse-glow"></div>
+
+    <!-- Badge Interativa -->
+    <div class="hero-anim inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-apple-card border border-apple-border text-xs text-apple-gray mb-6 shadow-xl backdrop-blur-md">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+      <span class="text-white font-semibold">Método 100% Gratuito</span>
+      <span class="text-white/20">•</span>
+      <span class="text-apple-blue font-medium">Gemini + Google Flow</span>
+    </div>
+
+    <!-- Título Principal com efeito Reveal -->
+    <h1 class="hero-anim text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight apple-gradient-text max-w-4xl leading-[1.08] mb-6">
+      Criando propaganda de qualquer produto com <span class="apple-gradient-accent">Inteligência Artificial</span>
+    </h1>
+    
+    <p class="hero-anim text-base sm:text-xl text-apple-gray max-w-2xl font-light mb-10 leading-relaxed">
+      Aprenda com <strong class="text-white font-medium">Jony Lan</strong> a transformar capturas de e-commerce em anúncios autênticos estilo UGC (<span class="text-white italic">User Generated Content</span>) de 10 segundos com atores hiper-realistas.
+    </p>
+
+    <!-- Botões de Ação Animados -->
+    <div class="hero-anim flex flex-wrap items-center justify-center gap-4 mb-14">
+      <a href="#passo-a-passo" class="group px-8 py-4 rounded-full bg-apple-blue hover:bg-apple-hoverBlue text-white font-semibold text-sm transition-all shadow-lg shadow-blue-500/30 transform hover:scale-105 flex items-center gap-3">
+        <i class="fa-solid fa-play text-xs transition-transform group-hover:scale-125"></i>
+        <span>Iniciar o Curso</span>
+      </a>
+      <a href="#simulador-ugc" class="px-8 py-4 rounded-full bg-white/10 hover:bg-white/15 border border-white/20 text-white font-semibold text-sm transition-all flex items-center gap-3 backdrop-blur-md transform hover:scale-105">
+        <i class="fa-solid fa-film text-purple-400 text-xs"></i>
+        <span>Testar Simulador 10s</span>
+      </a>
+    </div>
+
+    <!-- Indicador de Scroll Descendente -->
+    <a href="#produto" class="hero-anim text-apple-gray hover:text-white transition-colors flex flex-col items-center gap-2 text-xs font-mono animate-float cursor-pointer">
+      <span>EXPLORAR DEMO 3D</span>
+      <i class="fa-solid fa-chevron-down text-apple-blue text-sm"></i>
+    </a>
+  </section>
+
+  <!-- Secção do Produto 3D (iPhone Duo) -->
+  <section id="produto" class="pb-24 px-4 sm:px-6 max-w-5xl mx-auto relative z-10">
+    <div class="gsap-reveal apple-glass rounded-3xl p-6 sm:p-10 border border-white/10 shadow-2xl relative overflow-hidden glow-card">
+      
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 border-b border-white/10 pb-6">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-apple-blue/10 border border-apple-blue/30 text-[10px] text-apple-blue font-bold uppercase tracking-widest mb-2">
+            <i class="fa-solid fa-cube"></i> Modelo de Referência para o Comercial
+          </div>
+          <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">iPhone Duo • "Alô. Olá."</h2>
+          <p class="text-xs sm:text-sm text-apple-gray mt-1">Lançamento Exclusivo • Tecnologia de Ecrã Duplo Dobrável</p>
+        </div>
+
+        <!-- Controlador de Ângulo 3D -->
+        <div class="flex items-center space-x-3 bg-black/70 px-4 py-3 rounded-2xl border border-white/15 shadow-inner w-full sm:w-auto justify-between sm:justify-start">
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-mobile-screen-button text-sm text-apple-blue animate-pulse"></i>
+            <span class="text-xs text-apple-gray font-medium">Dobra 3D:</span>
+          </div>
+          <input id="fold-slider" type="range" min="0" max="75" value="30" class="w-28 sm:w-36 accent-blue-500 cursor-pointer">
+          <span id="fold-value" class="text-xs font-mono text-white bg-white/10 px-2 py-1 rounded">30°</span>
+        </div>
+      </div>
+
+      <!-- Dispositivo 3D Animado -->
+      <div class="device-perspective py-8 flex items-center justify-center min-h-[380px]">
+        <div id="device-container" class="relative flex items-center justify-center max-w-sm sm:max-w-md w-full transition-all duration-500 hover:scale-105">
+          
+          <!-- Asa Esquerda do Telemóvel -->
+          <div id="left-wing" class="device-wing w-1/2 aspect-[9/16] bg-[#0d0d0f] rounded-l-3xl p-3 shadow-2xl border-y border-l border-neutral-700 relative overflow-hidden origin-right"
+               style="transform: rotateY(30deg);">
+            <div class="shine-effect"></div>
+            <div class="w-full h-full bg-gradient-to-b from-[#1c1a17] via-[#121110] to-[#0a0a0c] rounded-2xl overflow-hidden relative flex flex-col justify-between p-3.5 border border-white/10 shadow-inner">
+              <div class="flex items-center justify-between text-[10px] text-white/80 font-mono">
+                <span>09:41</span>
+                <div class="flex items-center gap-1.5">
+                  <i class="fa-solid fa-wifi text-[9px]"></i>
+                  <i class="fa-solid fa-battery-full text-[9px] text-emerald-400"></i>
+                </div>
+              </div>
+              
+              <!-- Widget Visual -->
+              <div class="my-auto w-full aspect-square rounded-xl bg-cover bg-center overflow-hidden border border-white/15 shadow-2xl relative group cursor-pointer"
+                   style="background-image: url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80');">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+                <div class="absolute bottom-3 left-3 text-left">
+                  <span class="px-2 py-0.5 rounded bg-blue-500/40 text-[8px] text-blue-200 font-bold uppercase tracking-wider">Modo UGC</span>
+                  <p class="text-xs font-bold text-white mt-1">Atriz Principal</p>
+                </div>
+              </div>
+              
+              <div class="flex items-center justify-between text-[9px] text-white/50 font-mono">
+                <span>DISPLAY A</span>
+                <span class="text-emerald-400">● ATIVO</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dobradiça Central Refletiva -->
+          <div class="w-2 h-[88%] bg-gradient-to-b from-neutral-400 via-neutral-200 to-neutral-500 rounded-full z-30 shadow-2xl"></div>
+
+          <!-- Asa Direita do Telemóvel -->
+          <div id="right-wing" class="device-wing w-1/2 aspect-[9/16] bg-[#0d0d0f] rounded-r-3xl p-3 shadow-2xl border-y border-r border-neutral-700 relative overflow-hidden origin-left"
+               style="transform: rotateY(-30deg);">
+            <div class="shine-effect"></div>
+            <div class="w-full h-full bg-gradient-to-b from-[#1c1a17] via-[#121110] to-[#0a0a0c] rounded-2xl overflow-hidden relative flex flex-col justify-between p-3.5 border border-white/10 shadow-inner">
+              <div class="flex items-center justify-between text-[10px] text-white/80 font-mono">
+                <span>Gemini Pro</span>
+                <i class="fa-solid fa-sparkles text-amber-400 text-[10px]"></i>
+              </div>
+              
+              <!-- Grid de Aplicações do Ecossistema -->
+              <div class="grid grid-cols-3 gap-2 my-auto px-1">
+                <div class="aspect-square rounded-xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-400 text-sm hover:scale-110 transition-transform">
+                  <i class="fa-solid fa-camera"></i>
+                </div>
+                <div class="aspect-square rounded-xl bg-purple-500/20 border border-purple-400/30 flex items-center justify-center text-purple-400 text-sm hover:scale-110 transition-transform">
+                  <i class="fa-solid fa-film"></i>
+                </div>
+                <div class="aspect-square rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-400 text-sm hover:scale-110 transition-transform">
+                  <i class="fa-solid fa-bolt"></i>
+                </div>
+                <div class="aspect-square rounded-xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-amber-400 text-sm hover:scale-110 transition-transform">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <div class="aspect-square rounded-xl bg-rose-500/20 border border-rose-400/30 flex items-center justify-center text-rose-400 text-sm hover:scale-110 transition-transform">
+                  <i class="fa-solid fa-heart"></i>
+                </div>
+                <div class="aspect-square rounded-xl bg-cyan-500/20 border border-cyan-400/30 flex items-center justify-center text-cyan-400 text-sm hover:scale-110 transition-transform">
+                  <i class="fa-solid fa-share-nodes"></i>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between text-[9px] text-white/50 font-mono">
+                <span>DISPLAY B</span>
+                <span class="text-purple-400">● 120Hz</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Barra de Especificações Relevantes -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-6 border-t border-white/10 text-center">
+        <div class="p-3 rounded-2xl bg-white/5 border border-white/5">
+          <span class="text-[11px] text-apple-gray uppercase font-semibold">Formato do Comercial</span>
+          <p class="text-sm sm:text-base font-bold text-white mt-1">UGC Vertical (9:16)</p>
+        </div>
+        <div class="p-3 rounded-2xl bg-white/5 border border-white/5">
+          <span class="text-[11px] text-apple-gray uppercase font-semibold">Duração Estratégica</span>
+          <p class="text-sm sm:text-base font-bold text-white mt-1">Exatos 10 Segundos</p>
+        </div>
+        <div class="p-3 rounded-2xl bg-white/5 border border-white/5">
+          <span class="text-[11px] text-apple-gray uppercase font-semibold">Qualidade no Flow</span>
+          <p class="text-sm sm:text-base font-bold text-white mt-1">720p HD Render</p>
+        </div>
+        <div class="p-3 rounded-2xl bg-white/5 border border-white/5">
+          <span class="text-[11px] text-apple-gray uppercase font-semibold">Custo do Método</span>
+          <p class="text-sm sm:text-base font-bold text-emerald-400 mt-1">50 Créditos Grátis/Dia</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Ecossistema de Ferramentas -->
+  <section id="ferramentas" class="py-16 px-4 sm:px-6 max-w-5xl mx-auto relative z-10">
+    <div class="text-center max-w-2xl mx-auto mb-12 gsap-reveal">
+      <h2 class="text-xs font-bold uppercase tracking-widest text-apple-blue mb-2">Ecossistema de IA Obrigatório</h2>
+      <h3 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">As Ferramentas Gratuitas</h3>
+      <p class="text-apple-gray text-xs sm:text-sm mt-2">Clique para abrir os links oficiais recomendados no curso de Jony Lan.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      
+      <!-- Cartão Gemini -->
+      <a href="https://gemini.google.com/" target="_blank" rel="noopener noreferrer" 
+         class="gsap-reveal group p-8 rounded-3xl apple-glass border border-white/10 hover:border-apple-blue/50 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/20 flex flex-col justify-between relative overflow-hidden glow-card">
+        <div class="absolute -right-10 -top-10 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl group-hover:bg-blue-500/20 transition-all"></div>
+        <div>
+          <div class="flex items-center justify-between mb-6">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 flex items-center justify-center text-white text-3xl shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform">
+              <i class="fa-solid fa-sparkles"></i>
+            </div>
+            <span class="text-xs font-semibold px-3 py-1.5 rounded-full bg-white/10 text-white border border-white/15 flex items-center gap-2">
+              <span>gemini.google.com</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-apple-gray group-hover:text-white transition-colors"></i>
+            </span>
+          </div>
+          <h4 class="text-2xl font-bold text-white mb-3">Google Gemini</h4>
+          <p class="text-sm text-apple-gray leading-relaxed">
+            Responsável pelo planeamento criativo: analisa os prints anexados da página do produto, constrói o roteiro cronometrado e gera os quadrinhos visuais da modelo com o produto.
+          </p>
+        </div>
+        <div class="mt-8 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-apple-blue font-semibold">
+          <span>Abrir Plataforma do Gemini</span>
+          <i class="fa-solid fa-arrow-right text-xs transform group-hover:translate-x-2 transition-transform"></i>
+        </div>
+      </a>
+
+      <!-- Cartão Google Flow -->
+      <a href="https://labs.google/flow" target="_blank" rel="noopener noreferrer" 
+         class="gsap-reveal group p-8 rounded-3xl apple-glass border border-white/10 hover:border-purple-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20 flex flex-col justify-between relative overflow-hidden glow-card">
+        <div class="absolute -right-10 -top-10 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl group-hover:bg-purple-500/20 transition-all"></div>
+        <div>
+          <div class="flex items-center justify-between mb-6">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600 via-pink-600 to-rose-400 flex items-center justify-center text-white text-3xl shadow-lg shadow-purple-500/30 group-hover:scale-110 transition-transform">
+              <i class="fa-solid fa-film"></i>
+            </div>
+            <span class="text-xs font-semibold px-3 py-1.5 rounded-full bg-white/10 text-white border border-white/15 flex items-center gap-2">
+              <span>labs.google/flow</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-apple-gray group-hover:text-white transition-colors"></i>
+            </span>
+          </div>
+          <h4 class="text-2xl font-bold text-white mb-3">Google Flow</h4>
+          <p class="text-sm text-apple-gray leading-relaxed">
+            Motor de síntese de vídeo por IA generativa do Google. Transforma a imagem do storyboard num vídeo hiper-realista com movimento da modelo, oferecendo 50 créditos gratuitos por dia.
+          </p>
+        </div>
+        <div class="mt-8 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-purple-400 font-semibold">
+          <span>Abrir Plataforma do Google Flow</span>
+          <i class="fa-solid fa-arrow-right text-xs transform group-hover:translate-x-2 transition-transform"></i>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- Passo a Passo Detalhado do Curso -->
+  <section id="passo-a-passo" class="py-20 px-4 sm:px-6 max-w-5xl mx-auto relative z-10">
+    <div class="text-center max-w-3xl mx-auto mb-16 gsap-reveal">
+      <span class="text-xs font-bold uppercase tracking-widest text-apple-blue">Estrutura Pedagógica</span>
+      <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mt-2">Passo a Passo Completo</h2>
+      <p class="text-apple-gray text-sm sm:text-base mt-3">
+        Siga as 4 etapas chave desenhadas por Jony Lan para criar comercias UGC de alto desempenho.
+      </p>
+    </div>
+
+    <div class="space-y-10">
+
+      <!-- Módulo 1 -->
+      <div class="gsap-reveal apple-glass rounded-3xl p-6 sm:p-10 border border-white/10 relative glow-card">
+        <div class="flex flex-col md:flex-row items-start gap-6">
+          <div class="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-white font-extrabold text-xl shrink-0 shadow-lg">
+            01
+          </div>
+          <div class="flex-1">
+            <span class="text-xs uppercase tracking-wider text-apple-gray font-semibold">Módulo 1 • Captura de Ativos</span>
+            <h3 class="text-2xl font-bold text-white mt-1 mb-3">Prints Nítidos da Página do Produto</h3>
+            <p class="text-apple-gray text-sm leading-relaxed mb-4">
+              Aceda à página oficial do produto (exemplo: a página do <strong>iPhone Duo</strong>) e tire capturas de ecrã dos elementos mais marcantes: o formato dobrado, as câmaras traseiras, o suporte de mesa e as características técnicas.
+            </p>
+            <div class="bg-black/60 rounded-2xl p-4 border border-white/10 flex items-center space-x-3 text-xs text-white/90">
+              <i class="fa-solid fa-lightbulb text-amber-400 text-base shrink-0"></i>
+              <span><strong>Dica Prática:</strong> Quanto mais nítidos forem os detalhes da captura, mais fiel será a simulação no vídeo final.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Módulo 2 -->
+      <div class="gsap-reveal apple-glass rounded-3xl p-6 sm:p-10 border border-white/10 relative glow-card">
+        <div class="flex flex-col md:flex-row items-start gap-6">
+          <div class="w-14 h-14 rounded-2xl bg-blue-500/20 border border-blue-500/30 text-apple-blue font-extrabold text-xl flex items-center justify-center shrink-0 shadow-lg">
+            02
+          </div>
+          <div class="flex-1">
+            <span class="text-xs uppercase tracking-wider text-apple-blue font-semibold">Módulo 2 • Roteiro no Gemini</span>
+            <h3 class="text-2xl font-bold text-white mt-1 mb-3">Anexar Prints & Criar Roteiro Cronometrado</h3>
+            <p class="text-apple-gray text-sm leading-relaxed mb-4">
+              Aceda ao <a href="https://gemini.google.com/" target="_blank" rel="noopener noreferrer" class="text-apple-blue hover:underline font-medium">gemini.google.com</a>, clique no botão <strong>+</strong>, carregue os prints e envie o prompt:
+            </p>
+
+            <!-- Prompt 1 Copiável -->
+            <div class="bg-black/90 rounded-2xl p-5 border border-white/15 relative group mb-4">
+              <div class="flex items-center justify-between text-xs text-apple-gray mb-3 pb-2 border-b border-white/10">
+                <span class="font-mono text-white/70">Prompt 1 (Gemini) • Roteiro UGC</span>
+                <button onclick="copyToClipboard('prompt-1', 'Prompt do roteiro copiado!')" class="text-apple-blue hover:text-blue-300 font-semibold flex items-center gap-1.5 transition-colors">
+                  <i class="fa-regular fa-copy"></i>
+                  <span>Copiar</span>
+                </button>
+              </div>
+              <pre id="prompt-1" class="text-xs sm:text-sm font-mono text-emerald-400 whitespace-pre-wrap leading-relaxed">https://www.apple.com/br/iphone-duo/
+Baseado nas imagens do produto e do site, crie um storyboard de um comercial tipo UGC de 10 segundos</pre>
+            </div>
+
+            <div class="flex items-center gap-2 text-xs text-apple-gray">
+              <i class="fa-solid fa-clock text-blue-400"></i>
+              <span><strong>Por que 10 segundos?</strong> É o tempo ideal para manter a consistência facial e anatómica na IA generativa de vídeo.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Módulo 3 -->
+      <div class="gsap-reveal apple-glass rounded-3xl p-6 sm:p-10 border border-white/10 relative glow-card">
+        <div class="flex flex-col md:flex-row items-start gap-6">
+          <div class="w-14 h-14 rounded-2xl bg-purple-500/20 border border-purple-500/30 text-purple-400 font-extrabold text-xl flex items-center justify-center shrink-0 shadow-lg">
+            03
+          </div>
+          <div class="flex-1">
+            <span class="text-xs uppercase tracking-wider text-purple-400 font-semibold">Módulo 3 • Painel Visual</span>
+            <h3 class="text-2xl font-bold text-white mt-1 mb-3">Geração dos Quadrinhos do Storyboard</h3>
+            <p class="text-apple-gray text-sm leading-relaxed mb-4">
+              Em seguida, solicite no mesmo chat do Gemini a geração visual das cenas com o comando simples:
+            </p>
+
+            <!-- Prompt 2 Copiável -->
+            <div class="bg-black/90 rounded-2xl p-5 border border-white/15 relative mb-6 group">
+              <div class="flex items-center justify-between text-xs text-apple-gray mb-3 pb-2 border-b border-white/10">
+                <span class="font-mono text-white/70">Prompt 2 (Gemini) • Geração de Imagem</span>
+                <button onclick="copyToClipboard('prompt-2', 'Comando de imagem copiado!')" class="text-apple-blue hover:text-blue-300 font-semibold flex items-center gap-1.5 transition-colors">
+                  <i class="fa-regular fa-copy"></i>
+                  <span>Copiar</span>
+                </button>
+              </div>
+              <pre id="prompt-2" class="text-xs sm:text-sm font-mono text-emerald-400 whitespace-pre-wrap leading-relaxed">Crie as imagens do storyboard</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Módulo 4 -->
+      <div class="gsap-reveal apple-glass rounded-3xl p-6 sm:p-10 border border-white/10 relative glow-card">
+        <div class="flex flex-col md:flex-row items-start gap-6">
+          <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-extrabold text-xl flex items-center justify-center shrink-0 shadow-lg">
+            04
+          </div>
+          <div class="flex-1">
+            <span class="text-xs uppercase tracking-wider text-emerald-400 font-semibold">Módulo 4 • Animação Final</span>
+            <h3 class="text-2xl font-bold text-white mt-1 mb-3">Renderização no Google Flow</h3>
+            <p class="text-apple-gray text-sm leading-relaxed mb-4">
+              Abra o <a href="https://labs.google/flow" target="_blank" rel="noopener noreferrer" class="text-apple-blue hover:underline font-medium">labs.google/flow</a>, inicie um novo projeto para <strong>Vídeo (720p • 10s)</strong>, anexe a imagem do storyboard e envie o prompt final:
+            </p>
+
+            <!-- Prompt 3 Copiável -->
+            <div class="bg-black/90 rounded-2xl p-5 border border-white/15 relative group mb-4">
+              <div class="flex items-center justify-between text-xs text-apple-gray mb-3 pb-2 border-b border-white/10">
+                <span class="font-mono text-white/70">Prompt 3 (Google Flow) • Animação UGC</span>
+                <button onclick="copyToClipboard('prompt-3', 'Prompt do Flow copiado!')" class="text-apple-blue hover:text-blue-300 font-semibold flex items-center gap-1.5 transition-colors">
+                  <i class="fa-regular fa-copy"></i>
+                  <span>Copiar</span>
+                </button>
+              </div>
+              <pre id="prompt-3" class="text-xs sm:text-sm font-mono text-emerald-400 whitespace-pre-wrap leading-relaxed">Gere o vídeo do tipo UGC baseado nas referências anexas</pre>
+            </div>
+
+            <div class="bg-emerald-950/40 border border-emerald-500/40 rounded-2xl p-4 text-xs text-emerald-300 flex items-center gap-3 shadow-inner">
+              <i class="fa-solid fa-circle-check text-lg shrink-0"></i>
+              <span><strong>Resultado Obtido:</strong> O Google Flow anima os 10 segundos com a modelo a gesticular, falar para a câmara e demonstrar o produto.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Simulador Interativo do Comercial UGC de 10 Segundos -->
+  <section id="simulador-ugc" class="py-20 px-4 sm:px-6 max-w-5xl mx-auto relative z-10">
+    <div class="gsap-reveal apple-glass rounded-3xl p-6 sm:p-10 border border-white/15 shadow-2xl relative overflow-hidden glow-card">
+      
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-widest text-purple-400">Player Interativo</span>
+          <h3 class="text-2xl sm:text-4xl font-extrabold text-white mt-1">Simulador do Comercial UGC (0-10s)</h3>
+          <p class="text-xs sm:text-sm text-apple-gray mt-1">Veja como cada segmento de tempo é estruturado no vídeo final.</p>
+        </div>
+
+        <!-- Botões do Player -->
+        <div class="flex items-center space-x-3">
+          <button id="btn-play-sim" onclick="toggleSimPlay()" class="px-5 py-2.5 rounded-full bg-apple-blue hover:bg-apple-hoverBlue text-white font-semibold text-xs transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20">
+            <i id="sim-play-icon" class="fa-solid fa-play"></i>
+            <span id="sim-play-text">Reproduzir Timeline</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Barra de Progresso do Comercial -->
+      <div class="mb-6 bg-black/60 p-4 rounded-2xl border border-white/10">
+        <div class="flex items-center justify-between text-xs font-mono text-apple-gray mb-2">
+          <span class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+            TEMPO DE VÍDEO: <strong id="sim-timer-text" class="text-white">00:00 / 00:10</strong>
+          </span>
+          <span id="sim-current-scene-badge" class="px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-bold">CENA 1</span>
+        </div>
+        <div class="w-full bg-neutral-800 h-3 rounded-full overflow-hidden p-0.5 border border-white/10">
+          <div id="sim-progress-bar" class="bg-gradient-to-r from-blue-500 via-purple-500 to-emerald-400 h-full rounded-full transition-all duration-100" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Grid dos 4 Quadrinhos do Comercial -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Cena 1 -->
+        <div id="scene-card-1" onclick="jumpToScene(0)" class="scene-card bg-neutral-900/80 rounded-2xl p-4 border border-white/10 hover:border-blue-500/50 cursor-pointer transition-all">
+          <div class="flex items-center justify-between text-xs mb-2">
+            <span class="text-apple-blue font-bold font-mono">0.0s - 2.5s</span>
+            <span class="text-[10px] text-white/50 bg-white/10 px-2 py-0.5 rounded">Quadrinho 1</span>
+          </div>
+          <div class="aspect-video rounded-xl bg-neutral-800 mb-3 overflow-hidden relative">
+            <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=80" alt="Cena 1 - Revelação do Produto" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-2">
+              <span class="text-[10px] text-white font-medium">Abertura de Impacto</span>
+            </div>
+          </div>
+          <h4 class="text-sm font-bold text-white mb-1">A Revelação</h4>
+          <p class="text-xs text-apple-gray leading-relaxed">Modelo a segurar o iPhone Duo mostrando o ecrã duplo aberto.</p>
+        </div>
+
+        <!-- Cena 2 -->
+        <div id="scene-card-2" onclick="jumpToScene(2.5)" class="scene-card bg-neutral-900/80 rounded-2xl p-4 border border-white/10 hover:border-purple-500/50 cursor-pointer transition-all opacity-60">
+          <div class="flex items-center justify-between text-xs mb-2">
+            <span class="text-purple-400 font-bold font-mono">2.5s - 5.0s</span>
+            <span class="text-[10px] text-white/50 bg-white/10 px-2 py-0.5 rounded">Quadrinho 2</span>
+          </div>
+          <div class="aspect-video rounded-xl bg-neutral-800 mb-3 overflow-hidden relative">
+            <img src="https://images.unsplash.com/photo-1580910051074-3eb694886505?auto=format&fit=crop&w=500&q=80" alt="Cena 2 - Suporte de Mesa" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-2">
+              <span class="text-[10px] text-white font-medium">Modo Suporte</span>
+            </div>
+          </div>
+          <h4 class="text-sm font-bold text-white mb-1">Praticidade Real</h4>
+          <p class="text-xs text-apple-gray leading-relaxed">Telemóvel apoiado sozinho na mesa para videochamadas ou treino.</p>
+        </div>
+
+        <!-- Cena 3 -->
+        <div id="scene-card-3" onclick="jumpToScene(5.0)" class="scene-card bg-neutral-900/80 rounded-2xl p-4 border border-white/10 hover:border-emerald-500/50 cursor-pointer transition-all opacity-60">
+          <div class="flex items-center justify-between text-xs mb-2">
+            <span class="text-emerald-400 font-bold font-mono">5.0s - 7.5s</span>
+            <span class="text-[10px] text-white/50 bg-white/10 px-2 py-0.5 rounded">Quadrinho 3</span>
+          </div>
+          <div class="aspect-video rounded-xl bg-neutral-800 mb-3 overflow-hidden relative">
+            <img src="https://images.unsplash.com/photo-1512499617640-c74ae3a79d37?auto=format&fit=crop&w=500&q=80" alt="Cena 3 - Câmara 48MP" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-2">
+              <span class="text-[10px] text-white font-medium">Close nas Câmaras</span>
+            </div>
+          </div>
+          <h4 class="text-sm font-bold text-white mb-1">Qualidade 48MP</h4>
+          <p class="text-xs text-apple-gray leading-relaxed">Demonstração da câmara dupla gravando fotos de alta definição.</p>
+        </div>
+
+        <!-- Cena 4 -->
+        <div id="scene-card-4" onclick="jumpToScene(7.5)" class="scene-card bg-neutral-900/80 rounded-2xl p-4 border border-white/10 hover:border-cyan-500/50 cursor-pointer transition-all opacity-60">
+          <div class="flex items-center justify-between text-xs mb-2">
+            <span class="text-cyan-400 font-bold font-mono">7.5s - 10.0s</span>
+            <span class="text-[10px] text-white/50 bg-white/10 px-2 py-0.5 rounded">Quadrinho 4</span>
+          </div>
+          <div class="aspect-video rounded-xl bg-neutral-800 mb-3 overflow-hidden relative">
+            <img src="https://images.unsplash.com/photo-1556742049-0a674648c935?auto=format&fit=crop&w=500&q=80" alt="Cena 4 - Chamada de Ação" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-2">
+              <span class="text-[10px] text-white font-medium">Chamada de Ação (CTA)</span>
+            </div>
+          </div>
+          <h4 class="text-sm font-bold text-white mb-1">Fecho & CTA</h4>
+          <p class="text-xs text-apple-gray leading-relaxed">Aparelho fechado na mão e recomendação para comprar no site.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Gerador Dinâmico de Prompts -->
+  <section id="prompts" class="py-16 px-4 sm:px-6 max-w-4xl mx-auto relative z-10">
+    <div class="gsap-reveal apple-glass rounded-3xl p-8 sm:p-12 border border-white/15 shadow-2xl relative glow-card">
+      <div class="text-center max-w-2xl mx-auto mb-8">
+        <span class="text-xs font-bold uppercase tracking-widest text-apple-blue">Gerador Inteligente</span>
+        <h3 class="text-2xl sm:text-4xl font-extrabold text-white mt-1">Personalize para o Seu Produto</h3>
+        <p class="text-xs sm:text-sm text-apple-gray mt-2">Escolha uma predefinição ou digite os dados do seu próprio produto.</p>
+      </div>
+
+      <!-- Predefinições Rápidas -->
+      <div class="flex flex-wrap items-center justify-center gap-2 mb-6">
+        <button onclick="applyPreset('iphone')" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-medium text-white transition-all border border-white/15">
+          📱 iPhone Duo
+        </button>
+        <button onclick="applyPreset('tenis')" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-medium text-white transition-all border border-white/15">
+          👟 Sapatilha de Corrida
+        </button>
+        <button onclick="applyPreset('perfume')" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-medium text-white transition-all border border-white/15">
+          ✨ Perfume Importado
+        </button>
+        <button onclick="applyPreset('suplemento')" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-medium text-white transition-all border border-white/15">
+          ⚡ Suplemento Fitness
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-white/80 uppercase tracking-wider mb-2">URL da Página do Produto</label>
+          <input id="input-url" type="url" value="https://www.apple.com/br/iphone-duo/" class="w-full bg-black/70 border border-white/20 rounded-xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-apple-blue transition-colors font-mono">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-white/80 uppercase tracking-wider mb-2">Nome / Tipo do Produto</label>
+            <input id="input-product" type="text" value="iPhone dobrável com ecrã duplo" class="w-full bg-black/70 border border-white/20 rounded-xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-apple-blue transition-colors">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-white/80 uppercase tracking-wider mb-2">Diferenciais a Destacar</label>
+            <input id="input-feature" type="text" value="Câmara 48MP e modo suporte integrado" class="w-full bg-black/70 border border-white/20 rounded-xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-apple-blue transition-colors">
+          </div>
+        </div>
+
+        <div class="pt-2">
+          <button onclick="updateGeneratedPrompt(true)" class="w-full py-4 rounded-xl bg-gradient-to-r from-blue-600 via-purple-600 to-emerald-500 hover:opacity-95 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>Gerar Prompt Customizado</span>
+          </button>
+        </div>
+
+        <!-- Saída do Prompt Compilado -->
+        <div class="mt-6 bg-black/95 p-5 rounded-2xl border border-white/20 relative">
+          <div class="flex items-center justify-between text-xs text-apple-gray mb-3 pb-2 border-b border-white/10">
+            <span class="font-mono text-apple-blue font-semibold">Prompt Final para Enviar no Gemini</span>
+            <button onclick="copyToClipboard('dynamic-prompt', 'Prompt personalizado copiado!')" class="text-white hover:text-apple-blue font-semibold flex items-center gap-1.5 transition-colors bg-white/10 px-3 py-1 rounded-lg">
+              <i class="fa-regular fa-copy"></i>
+              <span>Copiar Prompt</span>
+            </button>
+          </div>
+          <pre id="dynamic-prompt" class="text-xs sm:text-sm font-mono text-emerald-400 whitespace-pre-wrap leading-relaxed min-h-[70px]">https://www.apple.com/br/iphone-duo/
+Baseado nas imagens do produto (iPhone dobrável com ecrã duplo) e do site, destacando Câmara 48MP e modo suporte integrado, crie um storyboard de um comercial tipo UGC de 10 segundos</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rodapé do Autor -->
+  <footer class="mt-20 border-t border-white/10 bg-black/95 py-16 px-4 sm:px-6 relative z-10">
+    <div class="max-w-4xl mx-auto flex flex-col items-center text-center">
+      
+      <!-- Avatar do Criador -->
+      <div class="relative mb-6 group cursor-pointer">
+        <div class="w-24 h-24 rounded-full p-1 bg-gradient-to-tr from-pink-500 via-purple-500 to-apple-blue shadow-2xl transform group-hover:scale-110 transition-transform">
+          <div class="w-full h-full rounded-full bg-neutral-900 overflow-hidden flex items-center justify-center text-white text-3xl font-bold">
+            <i class="fa-solid fa-wand-magic-sparkles text-amber-300 animate-pulse"></i>
+          </div>
+        </div>
+        <span class="absolute bottom-1 right-1 bg-blue-500 w-6 h-6 rounded-full border-2 border-black flex items-center justify-center text-xs text-white shadow-md">
+          <i class="fa-solid fa-check"></i>
+        </span>
+      </div>
+
+      <!-- Autor -->
+      <h3 class="text-3xl font-extrabold text-white">Criado por Jony Lan</h3>
+      <a href="https://instagram.com/jonylan" target="_blank" rel="noopener noreferrer" 
+         class="inline-flex items-center space-x-2 text-apple-blue hover:text-blue-300 font-semibold text-lg mt-1 transition-colors">
+        <i class="fa-brands fa-instagram text-pink-400"></i>
+        <span>@jonylan (instagram.com/jonylan)</span>
+      </a>
+
+      <!-- Frase Marcante -->
+      <p class="text-apple-gray text-sm sm:text-base max-w-lg mt-4 leading-relaxed italic">
+        "Todos os dias eu posto estratégias de como utilizar a inteligência artificial no seu dia a dia e no seu negócio. E agora você já sabe: <strong class="text-white not-italic font-bold">vai lá e testa!</strong>"
+      </p>
+
+      <!-- Botões Oficiais do Rodapé -->
+      <div class="flex flex-wrap items-center justify-center gap-4 mt-8">
+        <a href="https://instagram.com/jonylan" target="_blank" rel="noopener noreferrer" 
+           class="px-6 py-3 rounded-full bg-gradient-to-r from-pink-600 to-purple-600 text-white text-xs font-semibold hover:opacity-90 transition-opacity flex items-center gap-2 shadow-lg">
+          <i class="fa-brands fa-instagram text-sm"></i>
+          <span>Seguir no Instagram</span>
+        </a>
+        <a href="https://gemini.google.com/" target="_blank" rel="noopener noreferrer" 
+           class="px-6 py-3 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/20 transition-all flex items-center gap-2">
+          <i class="fa-solid fa-sparkles text-apple-blue text-sm"></i>
+          <span>Aceder ao Gemini</span>
+        </a>
+        <a href="https://labs.google/flow" target="_blank" rel="noopener noreferrer" 
+           class="px-6 py-3 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/20 transition-all flex items-center gap-2">
+          <i class="fa-solid fa-bolt text-purple-400 text-sm"></i>
+          <span>Aceder ao Google Flow</span>
+        </a>
+      </div>
+
+      <div class="w-full border-t border-white/10 mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-apple-gray">
+        <span>© Jony Lan • Criando propaganda de qualquer produto com IA.</span>
+        <span class="mt-2 sm:mt-0">Design e animações avançadas inspiradas na estética Apple.</span>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- Scripts JavaScript & Animações -->
+  <script>
+    // 1. Inicialização do GSAP e ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    window.addEventListener('load', () => {
+      // Animação Hero em sequência
+      gsap.from('.hero-anim', {
+        y: 40,
+        opacity: 0,
+        duration: 1,
+        stagger: 0.15,
+        ease: 'power3.out'
+      });
+
+      // Animação de revelação genérica por Scroll
+      gsap.utils.toArray('.gsap-reveal').forEach((elem) => {
+        gsap.from(elem, {
+          scrollTrigger: {
+            trigger: elem,
+            start: 'top 85%',
+            toggleActions: 'play none none reverse'
+          },
+          y: 50,
+          opacity: 0,
+          duration: 0.8,
+          ease: 'power2.out'
+        });
+      });
+    });
+
+    // 2. Barra de Progresso de Scroll
+    window.addEventListener('scroll', () => {
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('scroll-progress').style.width = scrolled + '%';
+    });
+
+    // 3. Canvas de Partículas Fluídas Interativas
+    const canvas = document.getElementById('ambient-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let mouse = { x: null, y: null };
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    window.addEventListener('mousemove', (e) => {
+      mouse.x = e.x;
+      mouse.y = e.y;
+    });
+
+    class Particle {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 0.5;
+        this.speedX = (Math.random() - 0.5) * 0.4;
+        this.speedY = (Math.random() - 0.5) * 0.4;
+        this.color = Math.random() > 0.5 ? 'rgba(41, 151, 255, ' : 'rgba(175, 82, 222, ';
+        this.alpha = Math.random() * 0.5 + 0.1;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        if (this.x < 0) this.x = canvas.width;
+        if (this.x > canvas.width) this.x = 0;
+        if (this.y < 0) this.y = canvas.height;
+        if (this.y > canvas.height) this.y = 0;
+      }
+      draw() {
+        ctx.fillStyle = this.color + this.alpha + ')';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < 55; i++) {
+      particles.push(new Particle());
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    // 4. Controlo 3D do Telemóvel Dobrável
+    const foldSlider = document.getElementById('fold-slider');
+    const foldValue = document.getElementById('fold-value');
+    const leftWing = document.getElementById('left-wing');
+    const rightWing = document.getElementById('right-wing');
+
+    function updateFold(deg) {
+      if (!foldValue || !leftWing || !rightWing) return;
+      foldValue.innerText = deg + '°';
+      leftWing.style.transform = `rotateY(${deg}deg)`;
+      rightWing.style.transform = `rotateY(-${deg}deg)`;
+    }
+
+    if (foldSlider) {
+      foldSlider.addEventListener('input', (e) => {
+        updateFold(e.target.value);
+      });
+    }
+
+    // Animação de dobragem automática no Scroll
+    gsap.to({}, {
+      scrollTrigger: {
+        trigger: '#produto',
+        start: 'top 70%',
+        end: 'bottom 30%',
+        scrub: 1,
+        onUpdate: (self) => {
+          const deg = Math.round(self.progress * 50);
+          if (foldSlider) {
+            foldSlider.value = deg;
+            updateFold(deg);
+          }
+        }
+      }
+    });
+
+    // 5. Função de Copiar para a Área de Transferência
+    function copyToClipboard(elementId, successMsg) {
+      const textToCopy = document.getElementById(elementId).innerText;
+      
+      const textarea = document.createElement('textarea');
+      textarea.value = textToCopy;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      
+      try {
+        document.execCommand('copy');
+        showToast(successMsg || 'Prompt copiado com sucesso!');
+        
+        // Efeito de confete leve no botão
+        confetti({
+          particleCount: 35,
+          spread: 60,
+          origin: { y: 0.85 }
+        });
+      } catch (err) {
+        showToast('Erro ao copiar.');
+      }
+      
+      document.body.removeChild(textarea);
+    }
+
+    // Exibir Notificação Toast
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toast-message');
+      toastMessage.innerText = message;
+      
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 2800);
+    }
+
+    // 6. Simulador de Vídeo UGC (Linha do Tempo de 10s)
+    let simInterval = null;
+    let simTime = 0;
+    let isSimPlaying = false;
+
+    function toggleSimPlay() {
+      if (isSimPlaying) {
+        pauseSim();
+      } else {
+        playSim();
+      }
+    }
+
+    function playSim() {
+      isSimPlaying = true;
+      document.getElementById('sim-play-icon').className = 'fa-solid fa-pause';
+      document.getElementById('sim-play-text').innerText = 'Pausar Simulador';
+
+      simInterval = setInterval(() => {
+        simTime += 0.1;
+        if (simTime > 10) {
+          simTime = 0;
+        }
+        updateSimUI();
+      }, 100);
+    }
+
+    function pauseSim() {
+      isSimPlaying = false;
+      clearInterval(simInterval);
+      document.getElementById('sim-play-icon').className = 'fa-solid fa-play';
+      document.getElementById('sim-play-text').innerText = 'Reproduzir Timeline';
+    }
+
+    function jumpToScene(seconds) {
+      simTime = seconds;
+      updateSimUI();
+    }
+
+    function updateSimUI() {
+      const pct = (simTime / 10) * 100;
+      document.getElementById('sim-progress-bar').style.width = pct + '%';
+      
+      const formattedSec = simTime.toFixed(1);
+      document.getElementById('sim-timer-text').innerText = `00:0${Math.floor(simTime)} / 00:10`;
+
+      // Atualizar destaque dos cartões de cena
+      const cards = [
+        document.getElementById('scene-card-1'),
+        document.getElementById('scene-card-2'),
+        document.getElementById('scene-card-3'),
+        document.getElementById('scene-card-4')
+      ];
+
+      cards.forEach(c => c.classList.add('opacity-60'));
+
+      let activeIndex = 0;
+      if (simTime >= 0 && simTime < 2.5) activeIndex = 0;
+      else if (simTime >= 2.5 && simTime < 5.0) activeIndex = 1;
+      else if (simTime >= 5.0 && simTime < 7.5) activeIndex = 2;
+      else if (simTime >= 7.5) activeIndex = 3;
+
+      cards[activeIndex].classList.remove('opacity-60');
+      document.getElementById('sim-current-scene-badge').innerText = `CENA ${activeIndex + 1}`;
+    }
+
+    // 7. Gerador de Prompts Dinâmico & Predefinições
+    const presets = {
+      iphone: {
+        url: 'https://www.apple.com/br/iphone-duo/',
+        product: 'iPhone dobrável com ecrã duplo',
+        feature: 'Câmara 48MP e modo suporte integrado'
+      },
+      tenis: {
+        url: 'https://www.exemplo.pt/tenis-pro-run/',
+        product: 'Sapatilha de Corrida Pro Run Ultra',
+        feature: 'Amortecimento a ar de alta resposta e tecido respirável'
+      },
+      perfume: {
+        url: 'https://www.exemplo.pt/perfume-noir/',
+        product: 'Perfume Noir Elixir de Luxo',
+        feature: 'Fixação 24 horas e frasco de vidro artesanal'
+      },
+      suplemento: {
+        url: 'https://www.exemplo.pt/creatina-pure/',
+        product: 'Creatina Pure Monohidratada 100%',
+        feature: 'Absorção ultra-rápida e aumento de força nos treinos'
+      }
+    };
+
+    function applyPreset(key) {
+      const p = presets[key];
+      if (!p) return;
+      document.getElementById('input-url').value = p.url;
+      document.getElementById('input-product').value = p.product;
+      document.getElementById('input-feature').value = p.feature;
+      updateGeneratedPrompt(true);
+    }
+
+    function updateGeneratedPrompt(notify = false) {
+      const url = document.getElementById('input-url').value.trim() || 'https://www.apple.com/br/iphone-duo/';
+      const product = document.getElementById('input-product').value.trim() || 'produto';
+      const feature = document.getElementById('input-feature').value.trim() || 'recursos inovadores';
+      
+      const compiled = `${url}\nBaseado nas imagens do produto (${product}) e do site, destacando ${feature}, crie um storyboard de um comercial tipo UGC de 10 segundos`;
+      
+      document.getElementById('dynamic-prompt').innerText = compiled;
+      
+      if (notify) {
+        showToast('Prompt atualizado com sucesso!');
+      }
+    }
+  </script>
+</body>
+</html>
